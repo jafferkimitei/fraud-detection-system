@@ -1,34 +1,40 @@
-# fraud-detection-system
+# 🛡️ Fraud Detection System for Online Payments
 
-## Tech Stack
-### 🔧 Backend
----
+This is a microservice-based fraud detection backend built with Node.js, Express, MongoDB, and Redis. It analyzes user transaction patterns to detect and block fraudulent behavior in real time.
 
-Node.js + Express – REST API/microservice
+## 📦 Features
 
-MongoDB – Transaction & user behavior storage
+- User behavior tracking
+- Transaction validation
+- Real-time fraud detection logic
+- Redis cache for fast lookups
+- Modular architecture (easily extendable with ML)
+- Built-in REST API for transactions
 
-Redis – For real-time rule checking & caching
+## 🚀 Tech Stack
 
-Socket.IO or Kafka/NATS – For real-time stream handling (we can start with simulated events)
+- Node.js + Express
+- MongoDB + Mongoose
+- Redis (`ioredis`)
+- Jest + Supertest (tests)
+- Nodemailer
+- Stripe / M-Pesa / Payment APIs
 
-Jest – Testing
+## 🧠 ML Ready
 
----
+The system is structured to support a future ML plugin (e.g., TensorFlow.js / Python microservice) that will evaluate high-risk transactions using trained models.
 
-### 🔐 Security
-Rate limiting, input validation, JWT-based auth
+## 🔧 Setup
 
----
-### 🎯 MVP Feature Scope
- Ingest and store transactions
+```bash
+# Clone repo
+git clone https://github.com/yourusername/fraud-detector.git
 
- Apply fraud rules (e.g., location mismatch, time anomalies, amount thresholds)
+# Install dependencies
+npm install
 
- Flag suspicious transactions
+# Copy env file
+cp .env.example .env
 
- Store flag history
-
- Real-time detection simulation
-
- REST endpoints for querying flagged activity
+# Start MongoDB and Redis, then:
+npm run dev

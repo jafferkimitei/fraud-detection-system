@@ -43,3 +43,14 @@ const detectFraud = async (transaction) => {
 };
 
 module.exports = detectFraud;
+
+async function evaluateTransaction(transaction) {
+  // Future: call a Python API / load a model
+  return {
+    isFraud: false,
+    score: 0.02 
+  };
+}
+
+module.exports = evaluateTransaction;
+
