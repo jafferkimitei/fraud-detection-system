@@ -1,10 +1,14 @@
-const Transaction = require('../models/Transaction');
+const redis = require('../config/redis');
+const transaction = require('../models/Transaction');
 const User = require('../models/User');
 
 const FRAUD_AMOUNT_THRESHOLD = 200000;
+const RAPID_TXN_THRESHOLD = 3;
+const TXN_WINDOW_SECONDS = 60;
 
 const detectFraud = async (transaction) => {
   const reasons = [];
+  const userId = transaction.userId.toString();
 
   const user = await User.findById(transaction.userId);
   if (!user) {
@@ -22,15 +26,17 @@ const detectFraud = async (transaction) => {
     reasons.push(`Geo mismatch: ${transaction.location} vs user ${user.country}`);
   }
 
-  // Rule 3: Rapid transactions
-  const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
-  const recentTxns = await Transaction.find({
-    userId: transaction.userId,
-    timestamp: { $gte: oneMinuteAgo }
-  });
+  // Rule 3: Rapid transactions via Redis
+  const now = Date.now();
+  const txnKey = `user_txn_${userId}`;
+  await redis.zadd(txnKey, now, now); 
+  await redis.expire(txnKey, TXN_WINDOW_SECONDS); 
 
-  if (recentTxns.length >= 3) {
-    reasons.push(`Multiple rapid transactions: ${recentTxns.length} in 1 min`);
+  const oneMinuteAgo = now - TXN_WINDOW_SECONDS * 1000;
+  const recentTxnCount = await redis.zcount(txnKey, oneMinuteAgo, now);
+
+  if (recentTxnCount > RAPID_TXN_THRESHOLD) {
+    reasons.push(`Too many transactions in ${TXN_WINDOW_SECONDS}s: ${recentTxnCount}`);
   }
 
   return reasons;
